@@ -1,11 +1,13 @@
 package com.example.qian.test;
 
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -23,8 +25,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.w3c.dom.Text;
 
+import MyFragments.FragmentBoxOffice;
+import MyFragments.FragmentSearch;
+import MyFragments.FragmentUpcoming;
+import network.VolleySingleton;
 import tabs.SlidingTabLayout;
 
 public class MainActivity extends ActionBarActivity {
@@ -46,14 +59,17 @@ public class MainActivity extends ActionBarActivity {
         mTabs= (SlidingTabLayout) findViewById(R.id.tabs);
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
         mTabs.setDistributeEvenly(true);   //set distribute tags
-        mTabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
-            @Override
-            public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.colorAccent);   //set tag underline color
-            }
-        });
+//        mTabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+//            @Override
+//            public int getIndicatorColor(int position) {
+//                return getResources().getColor(R.color.colorAccent);   //set tag underline color
+//            }
+//        });
+        mTabs.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        mTabs.setSelectedIndicatorColors(getResources().getColor(R.color.colorAccent));
         mTabs.setCustomTabView(R.layout.custom_tab_view,R.id.tabText);
         mTabs.setViewPager(mPager);
+
     }
 
 
@@ -76,9 +92,9 @@ public class MainActivity extends ActionBarActivity {
         return  super.onOptionsItemSelected(item);
     }
 
-    class MyPagerAdapter extends FragmentPagerAdapter{
+    class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-        int icons[]={R.drawable.ic_archive_black_36dp,R.drawable.ic_drafts_black_36dp,R.drawable.ic_mail_black_36dp};
+        int icons[]={R.drawable.ic_archive_white_36dp,R.drawable.ic_drafts_white_36dp,R.drawable.ic_report_white_36dp};
         String[] tabs;
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -87,7 +103,18 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int position) {
-            MyFragment myFragment=MyFragment.getInstance(position);
+            Fragment myFragment=null;
+            switch (position){
+                case 0:
+                    myFragment= FragmentSearch.newInstance("", "");
+                    break;
+                case 1:
+                    myFragment= FragmentBoxOffice.newInstance("", "");
+                    break;
+                case 2:
+                    myFragment= FragmentUpcoming.newInstance("", "");
+                    break;
+            }
             return myFragment;
         }
 
@@ -107,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public static class MyFragment extends Fragment{
+    public static class MyFragment extends Fragment{    //build simple fragment : xx+number
         private TextView textView;
         public static MyFragment getInstance(int position){
             MyFragment myFragment=new MyFragment();   //?
@@ -127,6 +154,18 @@ public class MainActivity extends ActionBarActivity {
             if(bundle!=null){
                 textView.setText("xx"+bundle.getInt("position"));
             }
+            RequestQueue requestQueue= VolleySingleton.getsInstance().getRequestQueue();
+            StringRequest request=new StringRequest(Request.Method.GET, " ", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
             return layout;
         }
     }
