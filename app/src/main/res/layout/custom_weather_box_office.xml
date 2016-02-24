@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="8dp"
+    card_view:cardElevation="8dp"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal" android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="center_vertical"
+        >
+
+        <TextView
+            android:id="@+id/wLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:textSize="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="location"/>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical" android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            >
+
+
+            <TextView
+                android:id="@+id/wWeather"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:padding="8dp"
+                android:textSize="20dp"
+                android:layout_gravity="center"
+                android:text="weather"/>
+            <TextView
+                android:id="@+id/wPressure"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:padding="8dp"
+                android:textSize="20dp"
+                android:layout_gravity="center"
+                android:text="pressure"/>
+        </LinearLayout>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical" android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="right"
+            >
+
+
+            <TextView
+                android:id="@+id/wTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:padding="8dp"
+                android:textSize="25dp"
+                android:layout_gravity="right"
+                android:text="temperature"/>
+            <TextView
+                android:id="@+id/wMin"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:padding="8dp"
+                android:textSize="10dp"
+                android:layout_gravity="right"
+                android:text="min"/>
+            <TextView
+                android:id="@+id/wMax"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:padding="8dp"
+                android:textSize="10dp"
+                android:layout_gravity="right"
+                android:text="max"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
