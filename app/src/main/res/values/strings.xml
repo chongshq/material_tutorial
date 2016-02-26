@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">test</string>
+    <string name="app_name">material</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="Next">Next</string>
     <string name="title_activity_sub">SubActivity</string>

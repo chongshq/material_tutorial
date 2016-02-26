@@ -5,17 +5,22 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -37,7 +42,7 @@ import network.VolleySingleton;
  * Use the {@link FragmentBoxOffice#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentBoxOffice extends Fragment {
+public class FragmentBoxOffice extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -47,12 +52,14 @@ public class FragmentBoxOffice extends Fragment {
     private VolleySingleton volleySingleton;
     private ImageLoader imageLoader;
     private RequestQueue requestQueue;
+    private TextView volleyError;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private ArrayList<Weather> listWeather=new ArrayList<>();
     private RecyclerView listWeathers;
     private AdapterBoxOffice adapterBoxOffice;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public static String getRequestUrl(String cityName,int day){
         return WEATHER_URL+"q="+cityName+"&cnt="+day+"&appid="+ MyApplication.API_KEY;
@@ -83,6 +90,12 @@ public class FragmentBoxOffice extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("weatherstate",listWeather);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -91,7 +104,7 @@ public class FragmentBoxOffice extends Fragment {
         }
         volleySingleton=VolleySingleton.getsInstance();
         requestQueue=volleySingleton.getRequestQueue();
-        sendJsonRequest();
+
 
     }
 
@@ -101,6 +114,7 @@ public class FragmentBoxOffice extends Fragment {
 
             @Override
             public void onResponse(JSONObject response) {
+                volleyError.setVisibility(View.GONE);
                 Log.e("s",getRequestUrl("Shanghai",5));
                 parseJSONResponse(response);
                 adapterBoxOffice.setWeatherList(listWeather);
@@ -111,7 +125,14 @@ public class FragmentBoxOffice extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("s",getRequestUrl("Shanghai",5));
+
+                volleyError.setVisibility(View.VISIBLE);
+                if(error instanceof TimeoutError || error instanceof NoConnectionError){
+                    volleyError.setText("network error");
+                }else if(error instanceof NetworkError){
+                    volleyError.setText("network error");
+                }
+
             }
         });
         requestQueue.add(request);
@@ -165,11 +186,27 @@ public class FragmentBoxOffice extends Fragment {
         // Inflate the layout for this fragment
 
         View view=inflater.inflate(R.layout.fragment_box_office, container, false);
+        swipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.swipe);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        volleyError= (TextView) view.findViewById(R.id.textVolleyError);
         listWeathers= (RecyclerView) view.findViewById(R.id.listWeathers);
         listWeathers.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapterBoxOffice=new AdapterBoxOffice(getActivity());
         listWeathers.setAdapter(adapterBoxOffice);
+        if(savedInstanceState!=null){
+            listWeather=savedInstanceState.getParcelableArrayList("weatherstate");
+            adapterBoxOffice.setWeatherList(listWeather);
+        }
+        else {
+            sendJsonRequest();
+        }
+
         return view;
     }
 
+    @Override
+    public void onRefresh() {
+        Weather._alert(getActivity(),"Loading...");
+
+    }
 }
