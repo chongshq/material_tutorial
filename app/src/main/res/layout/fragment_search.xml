@@ -1,12 +1,110 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 
     tools:context="MyFragments.FragmentSearch">
 
     <!-- TODO: Update blank fragment layout -->
 
-    <include layout="@layout/cardview_test"/>
 
-</FrameLayout>
+
+    <RelativeLayout
+android:id="@+id/layout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+
+    </RelativeLayout>
+
+
+    <Button
+        android:id="@+id/find"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout1"
+        android:text="搜索老人"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/bandList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/find"/>
+
+
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/elderInfo"
+        android:layout_below="@+id/find"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_margin="8dp"
+        card_view:cardCornerRadius="8dp"
+        card_view:cardElevation="8dp"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center_vertical"
+            >
+
+            <TextView
+                android:id="@+id/elderid"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:padding="8dp"
+                android:textSize="20dp"
+                android:layout_gravity="center_vertical"
+                android:text="location"/>
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical" android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                >
+
+
+                <TextView
+                    android:id="@+id/eldername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:padding="8dp"
+                    android:textSize="20dp"
+                    android:layout_gravity="center"
+                    android:text="weather"/>
+                <TextView
+                    android:id="@+id/elderphone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:padding="8dp"
+                    android:textSize="20dp"
+                    android:layout_gravity="center"
+                    android:text="pressure"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/findbtn"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="18dp"
+            app:backgroundTint="@color/colorAccent"
+            app:rippleColor="#33728dff"
+            app:borderWidth="0dp"
+            app:elevation="12dp"
+            android:clickable="true"
+            app:pressedTranslationZ="12dp"
+            android:src="@drawable/ic_search_white_48dp"/>
+    </FrameLayout>
+
+
+</RelativeLayout>

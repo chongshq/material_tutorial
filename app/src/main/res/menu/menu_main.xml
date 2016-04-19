@@ -10,6 +10,6 @@
     <item android:id="@+id/nevigate"
         android:title="@string/Next"
         android:orderInCategory="200"
-        android:icon="@drawable/ic_skip_next_black_48dp"
+        android:icon="@drawable/ic_search_white_48dp"
         app:showAsAction="always"/>
 </menu>

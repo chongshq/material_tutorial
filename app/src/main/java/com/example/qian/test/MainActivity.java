@@ -1,6 +1,9 @@
 package com.example.qian.test;
 
 import android.app.DownloadManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
@@ -45,11 +48,14 @@ public class MainActivity extends ActionBarActivity {
     private Toolbar toolbar;
     private ViewPager mPager;
     private SlidingTabLayout mTabs;
+    private NotificationManager notificationManager=null;
+    private Notification notification=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         toolbar= (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -67,8 +73,12 @@ public class MainActivity extends ActionBarActivity {
 //        });
         mTabs.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         mTabs.setSelectedIndicatorColors(getResources().getColor(R.color.colorAccent));
-        mTabs.setCustomTabView(R.layout.custom_tab_view,R.id.tabText);
+        mTabs.setCustomTabView(R.layout.custom_tab_view, R.id.tabText);
         mTabs.setViewPager(mPager);
+        notificationManager= (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Intent intent=new Intent(this, SubActivity.class);
+        PendingIntent pendingIntent=PendingIntent.getActivity(this,0,intent,0);
+
 
     }
 
