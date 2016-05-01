@@ -57,9 +57,11 @@ import com.xiaomi.opensdk.pdc.exception.RetriableException;
 import com.xiaomi.opensdk.pdc.exception.UnretriableException;
 import com.zhaoxiaodan.miband.ActionCallback;
 import com.zhaoxiaodan.miband.MiBand;
+import com.zhaoxiaodan.miband.listeners.HeartRateNotifyListener;
 import com.zhaoxiaodan.miband.listeners.NotifyListener;
 import com.zhaoxiaodan.miband.model.BatteryInfo;
 import com.zhaoxiaodan.miband.model.LedColor;
+import com.zhaoxiaodan.miband.model.UserInfo;
 import com.zhaoxiaodan.miband.model.VibrationMode;
 
 import org.json.JSONArray;
@@ -92,6 +94,8 @@ public class FragmentSearch extends Fragment {
     private static final int SHOW_BATTERY=3;
     private static final int SHOW_INFO=4;
     private static final int NOTIFY_DISCONNECTION=5;
+
+    private static final int _HEART_RESULT =7;
 
     public static final String WEATHER_URL="http://api.openweathermap.org/data/2.5/forecast/daily?";
     // TODO: Rename and change types of parameters
@@ -139,6 +143,7 @@ public class FragmentSearch extends Fragment {
     private BluetoothDevice miband_selected;
     private BatteryInfo batteryInfo;
     private MyThread thread;
+    private int mHeartRate;
 
     private Thread mThread;
     public FragmentSearch() {
@@ -188,12 +193,6 @@ public class FragmentSearch extends Fragment {
         {
             device = result.getDevice();
 
-//            Toast.makeText(getActivity(),
-//                    ": name:" + device.getName() + ",uuid:"
-//                            + device.getUuids() + ",add:"
-//                            + device.getAddress() + ",type:"
-//                            + device.getType() + ",bondState:"
-//                            + device.getBondState() + ",rssi:" + result.getRssi(), Toast.LENGTH_SHORT).show();
             if(device_conn.size()==0){
                 device_conn.add(device);
                 bluetoothDevices.add(device.getAddress());
@@ -281,6 +280,8 @@ class MyThread extends Thread {
 
                             Toast.makeText(getActivity(),"连接断开，请重试！",Toast.LENGTH_SHORT).show();
 
+                }else if(msg.what== _HEART_RESULT){
+                    Toast.makeText(getActivity(),"heart rate: "+mHeartRate,Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -359,7 +360,7 @@ class MyThread extends Thread {
         notificationManager= (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         // requestWindowFeature(Window.FEATURE_NO_TITLE);
        // setContentView(R.layout.activity_main);
-        prepare();
+     //  prepare();
 //        initView();
 
          miBand=new MiBand(getActivity());
@@ -399,6 +400,21 @@ class MyThread extends Thread {
                         thread.handler.sendEmptyMessage(CONNECTED);
                         miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
 
+
+//                        UserInfo userInfo = new UserInfo(20111111, 1, 32, 180, 55, "胖梁", 0);
+//                        miBand.setUserInfo(userInfo);
+//                        miBand.setHeartRateScanListener(new HeartRateNotifyListener()
+//                        {
+//                            @Override
+//                            public void onNotify(int heartRate)
+//                            {
+//                               thread.handler.sendEmptyMessage(_HEART_RESULT);
+//                            }
+//                        });
+
+
+
+
                         miBand.setDisconnectedListener(new NotifyListener()
                         {
                             @Override
@@ -407,8 +423,10 @@ class MyThread extends Thread {
                                 thread.handler.sendEmptyMessage(NOTIFY_DISCONNECTION);
                             }
                         });
+
+
                         MyApplication myApplication = (MyApplication)getActivity().getApplicationContext();
-                        myApplication.setMiBand(miBand);
+                        myApplication.setMiBand(miBand,getActivity());
                         myApplication.setBand_addr(miband_selected.getAddress());
                         Intent it = new Intent(getActivity(), SubActivity.class);
                         startActivityForResult(it,2);
@@ -422,6 +440,7 @@ class MyThread extends Thread {
             public void onItemLongClick(View view, int data) {
 
                 thread.handler.sendEmptyMessage(SHOW_INFO);
+                miBand.startHeartRateScan();
                 setBattaryInfo(new BatteryInfoDisplay() {
                     @Override
                     public void showBattaryInfo() {

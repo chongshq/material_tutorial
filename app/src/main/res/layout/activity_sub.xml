@@ -10,17 +10,38 @@
     <include android:id="@+id/app_bar"
         layout="@layout/app_bar"/>
 
-    <com.db.chart.view.LineChartView
-        xmlns:chart="http://schemas.android.com/apk/res-auto"
+    <!--<lecho.lib.hellocharts.view.LineChartView-->
+        <!--android:id="@+id/linechart"-->
+        <!--android:layout_margin="18dp"-->
+        <!--android:layout_below="@+id/app_bar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="360dp" />-->
+    <com.github.mikephil.charting.charts.LineChart
+
         android:id="@+id/linechart"
+        android:layout_margin="18dp"
         android:layout_below="@+id/app_bar"
         android:layout_width="match_parent"
+        android:layout_height="360dp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linechart"
         android:layout_margin="18dp"
-        chart:chart_axisThickness="3dp"
-        chart:chart_axisBorderSpacing="20dp"
-        chart:chart_axisTopSpacing="20dp"
-        chart:chart_axisColor="@color/chartaxis"
-        android:layout_height="360dp"/>
+        android:orientation="horizontal">
+        <!--<Button-->
+            <!--android:id="@+id/setInfo"-->
+            <!--android:layout_width="120dp"-->
+            <!--android:layout_height="50dp"-->
+            <!--android:text="setInfo"-->
+            <!--/>-->
+        <!--<Button-->
+            <!--android:id="@+id/setListenter"-->
+            <!--android:layout_width="120dp"-->
+            <!--android:layout_height="50dp"-->
+            <!--android:text="BindListener"-->
+            <!--/>-->
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"

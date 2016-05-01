@@ -2,8 +2,10 @@ package com.example.qian.test;
 
 import android.app.Application;
 import android.content.Context;
+import android.widget.Toast;
 
 import com.zhaoxiaodan.miband.MiBand;
+import com.zhaoxiaodan.miband.listeners.HeartRateNotifyListener;
 
 /**
  * Created by john on 2016/2/22.
@@ -35,8 +37,9 @@ public class MyApplication extends Application {
         return miBand;
     }
 
-    public void setMiBand(MiBand miBand) {
+    public void setMiBand(MiBand miBand, final Context context) {
         this.miBand = miBand;
+
     }
     public static MyApplication getsInstance(){
         return sInstance;

@@ -20,6 +20,10 @@ android {
     }
 }
 
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
@@ -34,4 +38,6 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.+'
     compile files('src/main/java/libs/bong-sdk-1.2.1.jar')
     compile 'com.diogobernardino:williamchart:2.2'
+    compile 'com.github.lecho:hellocharts-library:1.5.8@aar'
+    compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
 }

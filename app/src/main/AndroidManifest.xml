@@ -50,6 +50,11 @@
             </intent-filter>
         </receiver>
         <service android:name="cn.bong.android.sdk.BlueService"/>
+        <service android:name=".HeartBeatService">
+            <intent-filter>
+                <action android:name=".service.HEARTSERVICE"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

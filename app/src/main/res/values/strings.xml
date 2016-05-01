@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">test</string>
+    <string name="app_name">OCare Band</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="Next">Next</string>
-    <string name="title_activity_sub">SubActivity</string>
+    <string name="title_activity_sub">心跳数据</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
