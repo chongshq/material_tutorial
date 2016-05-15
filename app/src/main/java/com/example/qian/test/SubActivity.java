@@ -74,12 +74,17 @@ public class SubActivity extends ActionBarActivity {
     private int initialState ;
     private AlertDialog alert = null;
     private AlertDialog.Builder builder = null;
+    private Intent normalIntent;
+    private Intent emergencyIntent;
+    private int serviceflag = 0;
+    private int threshold = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
-
+        normalIntent = new Intent(SubActivity.this,HeartBeatService.class);
+        emergencyIntent = new Intent(SubActivity.this, Emergency.class);
         initialState = 0;
         mDate=new ArrayList<String>();
         mHeartBeat=new ArrayList<Float>();
@@ -104,6 +109,8 @@ public class SubActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         chartView= (LineChart) findViewById(R.id.linechart);
         heartBeatTest= (FloatingActionButton) findViewById(R.id.beatbtn);
+        setInfobtn = (Button) findViewById(R.id.setInfoBtn);
+
         setbtn();
 
         toFloat();
@@ -112,18 +119,45 @@ public class SubActivity extends ActionBarActivity {
         initNewChart(chartView);
 
         setNewChart(chartView);
+        setThreshold();
+    }
+
+    private void setThreshold(){
+        final String[] items = new String[]{"60", "70", "80", "90", "100","110","120"};
+        alert = null;
+        builder = new AlertDialog.Builder(SubActivity.this);
+        alert = builder.setTitle("请设置正常心跳（默认为100）")
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Toast.makeText(mContext, "你点击了取消按钮~", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Toast.makeText(mContext, "你点击了取消按钮~", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(), "你选择了" + items[which], Toast.LENGTH_SHORT).show();
+                        threshold = 10*(which+6);
+                    }
+                }).create();
+        alert.show();
     }
 
     private void setbtn() {
 
-//        setInfobtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                UserInfo userInfo = new UserInfo(20111111, 1, 32, 180, 55, "胖梁", 0);
-//               miBand.setUserInfo(userInfo);
-//            }
-//        });
-//
+        setInfobtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               setThreshold();
+            }
+        });
+
 //        setListenerbtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -168,6 +202,23 @@ public class SubActivity extends ActionBarActivity {
                                             //Toast.makeText(SubActivity.this,heartRate,Toast.LENGTH_SHORT).show();
                                             heartbeat_result = heartRate;
                                             addEntry();
+                                            if(heartRate > threshold || heartRate<=40){
+                                                stopService(normalIntent);
+                                                if(serviceflag == 0){
+
+                                                    startService(emergencyIntent);
+                                                    serviceflag = 1;
+                                                }
+
+
+                                            }else if(heartRate>40 && heartRate<=threshold){
+                                                stopService(emergencyIntent);
+                                                if(serviceflag == 1){
+                                                    startService(normalIntent);
+                                                    serviceflag = 0;
+                                                }
+
+                                            }
                                         }
                                     });
                                     Toast.makeText(SubActivity.this, "设置成功，可开始检测", Toast.LENGTH_SHORT).show();
@@ -177,9 +228,9 @@ public class SubActivity extends ActionBarActivity {
                     alert.show();                    //显示对话框
                 }
                 else if (initialState==1){
-                    Intent i = new Intent(SubActivity.this,HeartBeatService.class);
+
                     Log.d("BackService","dd");
-                    startService(i);
+                    startService(normalIntent);
 
                     Toast.makeText(SubActivity.this, "正在检测心率...", Toast.LENGTH_SHORT).show();
                 }
@@ -270,7 +321,7 @@ public class SubActivity extends ActionBarActivity {
         leftAxis.setTextColor(Color.WHITE);
 
         // 最大值
-        leftAxis.setAxisMaxValue(150);
+        leftAxis.setAxisMaxValue(200);
 
         // 最小值
         leftAxis.setAxisMinValue(50);

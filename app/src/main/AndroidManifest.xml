@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.qian.test">
-    <permission android:name="cn.bong.android.permission.EVENT"
+
+    <permission
+        android:name="cn.bong.android.permission.EVENT"
         android:label="bong event"
-        android:protectionLevel="dangerous"/>
-    <uses-permission android:name="cn.bong.android.permission.EVENT"/>
+        android:protectionLevel="dangerous" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="cn.bong.android.permission.EVENT" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application
-        android:allowBackup="true"
         android:name=".MyApplication"
+        android:allowBackup="true"
         android:icon="@drawable/adobeacrobatreader"
         android:label="@string/app_name"
         android:supportsRtl="true"
-
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:alwaysRetainTaskState="true" android:launchMode="singleTop">
+        <activity
+            android:name=".MainActivity"
+            android:alwaysRetainTaskState="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".Main2Activity"
@@ -35,24 +37,33 @@
         <activity
             android:name=".SubActivity"
             android:label="@string/title_activity_sub">
-            <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".MainActivity"/>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
-
         <activity
             android:name="cn.bong.android.sdk.AuthActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <receiver android:name="cn.bong.android.sdk.BongDataReceiver"
+        <receiver
+            android:name="cn.bong.android.sdk.BongDataReceiver"
             android:permission="cn.bong.android.permission.EVENT">
             <intent-filter>
-                <action android:name="cn.bong.android.action.event"/>
+                <action android:name="cn.bong.android.action.event" />
             </intent-filter>
         </receiver>
-        <service android:name="cn.bong.android.sdk.BlueService"/>
+
+        <service android:name="cn.bong.android.sdk.BlueService" />
         <service android:name=".HeartBeatService">
             <intent-filter>
-                <action android:name=".service.HEARTSERVICE"/>
+                <action android:name=".service.HEARTSERVICE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".Emergency">
+            <intent-filter>
+                <action android:name=".service.EMERGENCY" />
             </intent-filter>
         </service>
     </application>
