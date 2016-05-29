@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.db.chart.model.LineSet;
@@ -78,6 +79,7 @@ public class SubActivity extends ActionBarActivity {
     private Intent emergencyIntent;
     private int serviceflag = 0;
     private int threshold = 100;
+    private TextView thres;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +112,7 @@ public class SubActivity extends ActionBarActivity {
         chartView= (LineChart) findViewById(R.id.linechart);
         heartBeatTest= (FloatingActionButton) findViewById(R.id.beatbtn);
         setInfobtn = (Button) findViewById(R.id.setInfoBtn);
-
+        thres= (TextView) findViewById(R.id.threshold);
         setbtn();
 
         toFloat();
@@ -119,10 +121,18 @@ public class SubActivity extends ActionBarActivity {
         initNewChart(chartView);
 
         setNewChart(chartView);
-        setThreshold();
+        Intent it = getIntent();
+        Bundle b = it.getExtras();
+        int heartThreshold = b.getInt("heartThreshold");
+        if(heartThreshold==0){
+            setThreshold(heartThreshold);
+        }else {
+            thres.setText(heartThreshold+"");
+        }
+
     }
 
-    private void setThreshold(){
+    private void setThreshold(final int heartThreshold){
         final String[] items = new String[]{"60", "70", "80", "90", "100","110","120"};
         alert = null;
         builder = new AlertDialog.Builder(SubActivity.this);
@@ -131,12 +141,34 @@ public class SubActivity extends ActionBarActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Toast.makeText(mContext, "你点击了取消按钮~", Toast.LENGTH_SHORT).show();
+                        if(heartThreshold==0){
+                            db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
+                                    new String[]{100+"",band_addr});
+                            thres.setText(100+"");
+                            Intent it = new Intent();
+                            it.putExtra("newHeartThreshold",100);
+                            setResult(2,it);
+                        }else {
+                            db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
+                                    new String[]{heartThreshold+"",band_addr});
+                            thres.setText(heartThreshold+"");
+                            Intent it = new Intent();
+                            it.putExtra("newHeartThreshold",100);
+                            setResult(2,it);
+                        }
+
                     }
                 })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Toast.makeText(mContext, "你点击了取消按钮~", Toast.LENGTH_SHORT).show();
+                        db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
+                                new String[]{threshold+"",band_addr});
+                        thres.setText(threshold+"");
+                        Intent it = new Intent();
+                        it.putExtra("newHeartThreshold",threshold);
+                        setResult(2,it);
                     }
                 })
                 .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
@@ -154,7 +186,7 @@ public class SubActivity extends ActionBarActivity {
         setInfobtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               setThreshold();
+               setThreshold(threshold);
             }
         });
 
@@ -530,7 +562,7 @@ public class SubActivity extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            UserInfo userInfo = new UserInfo(20111111, 1, 32, 180, 55, "张君义", 0);
+            UserInfo userInfo = new UserInfo(20111111, 1, 32, 180, 55, "老人", 0);
             miBand.setUserInfo(userInfo);
 
             heartbeat_result = 87;

@@ -12,6 +12,8 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -71,6 +74,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import DB.MyDBOpenHelper;
 import cn.bong.android.sdk.BongManager;
 import cn.bong.android.sdk.config.Environment;
 import cn.bong.android.sdk.model.http.auth.AuthError;
@@ -89,6 +93,8 @@ public class FragmentSearch extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private SQLiteDatabase db;
+    private MyDBOpenHelper myDBHelper;
     private static final int MIBAND_CONNECT = 1;
     private static final int CONNECTED = 2;
     private static final int SHOW_BATTERY=3;
@@ -144,6 +150,8 @@ public class FragmentSearch extends Fragment {
     private BatteryInfo batteryInfo;
     private MyThread thread;
     private int mHeartRate;
+    private int flag;
+    private int heartThreshold;
 
     private Thread mThread;
     public FragmentSearch() {
@@ -186,6 +194,24 @@ public class FragmentSearch extends Fragment {
         }
     }
 
+    public String getInfoFromDB(String id){
+        Cursor cursor = db.rawQuery("SELECT * FROM elder_band WHERE band_addr = ?",
+                new String[]{id});
+        String elderName;
+        if (cursor.moveToFirst()) {
+
+                heartThreshold = cursor.getInt(cursor.getColumnIndex("heartbeat"));
+                elderName = cursor.getString(cursor.getColumnIndex("elder_name"));
+            flag= 1;
+        }
+        else {
+            elderName = "未知";
+            flag = 0;
+        }
+        cursor.close();
+        return elderName;
+    }
+
     ScanCallback scanCallback = new ScanCallback()
     {
         @Override
@@ -195,7 +221,7 @@ public class FragmentSearch extends Fragment {
 
             if(device_conn.size()==0){
                 device_conn.add(device);
-                bluetoothDevices.add(device.getAddress());
+                bluetoothDevices.add("设备名称："+device.getName()+" | "+"地址："+device.getAddress()+" | "+"信息:" + getInfoFromDB(device.getAddress()));
             }else{
                 for(int i=0;i<device_conn.size();i++){
 
@@ -204,7 +230,7 @@ public class FragmentSearch extends Fragment {
                     }else{
                         if(i==device_conn.size()-1){
                             device_conn.add(device);
-                            bluetoothDevices.add(device.getAddress());
+                            bluetoothDevices.add("设备名称："+device.getName()+" | "+"地址："+device.getAddress()+" | "+"信息:" + getInfoFromDB(device.getAddress()));
                         }
                     }
                 }
@@ -355,6 +381,9 @@ class MyThread extends Thread {
             mParam2 = getArguments().getString(ARG_PARAM2);
 
         }
+        myDBHelper = new MyDBOpenHelper(getActivity(), "my.db", null, 1);
+        db = myDBHelper.getWritableDatabase();
+        //myDBHelper.onUpgrade(db,1,2);
         volleySingleton= VolleySingleton.getsInstance();
         requestQueue=volleySingleton.getRequestQueue();
         notificationManager= (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -367,6 +396,14 @@ class MyThread extends Thread {
         device_conn=new ArrayList<BluetoothDevice>();
         bluetoothDevices = new ArrayList<String>();
 
+        PreferenceManager.OnActivityResultListener on = new PreferenceManager.OnActivityResultListener() {
+            @Override
+            public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+                int i = data.getIntExtra("newHeartThreshold",100);
+                heartThreshold= i;
+                return false;
+            }
+        };
 
 
     }
@@ -399,22 +436,19 @@ class MyThread extends Thread {
                         // Toast.makeText(getActivity(),"Connected",Toast.LENGTH_SHORT).show();
                         thread.handler.sendEmptyMessage(CONNECTED);
                         miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
+                        miBand.pair(new ActionCallback() {
+                            @Override
+                            public void onSuccess(Object data)
+                            {
+                                //changeStatus("pair succ");
+                            }
 
-
-//                        UserInfo userInfo = new UserInfo(20111111, 1, 32, 180, 55, "胖梁", 0);
-//                        miBand.setUserInfo(userInfo);
-//                        miBand.setHeartRateScanListener(new HeartRateNotifyListener()
-//                        {
-//                            @Override
-//                            public void onNotify(int heartRate)
-//                            {
-//                               thread.handler.sendEmptyMessage(_HEART_RESULT);
-//                            }
-//                        });
-
-
-
-
+                            @Override
+                            public void onFail(int errorCode, String msg)
+                            {
+                                //changeStatus("pair fail");
+                            }
+                        });
                         miBand.setDisconnectedListener(new NotifyListener()
                         {
                             @Override
@@ -423,12 +457,22 @@ class MyThread extends Thread {
                                 thread.handler.sendEmptyMessage(NOTIFY_DISCONNECTION);
                             }
                         });
+                        if(flag == 0){
+                            db.execSQL("INSERT INTO elder_band(band_addr,elder_name,band_name,heartbeat) values(?,?,?,?)",
+                                    new String[]{miband_selected.getAddress(),"我的手环",miband_selected.getName(),0+""});
+                            flag = 1;
+                        }else if(flag==1){
+
+                        }
 
 
                         MyApplication myApplication = (MyApplication)getActivity().getApplicationContext();
                         myApplication.setMiBand(miBand,getActivity());
                         myApplication.setBand_addr(miband_selected.getAddress());
                         Intent it = new Intent(getActivity(), SubActivity.class);
+                        Bundle b = new Bundle();
+                        b.putInt("heartThreshold",heartThreshold);
+                        it.putExtras(b);
                         startActivityForResult(it,2);
                         //thread.handler.sendEmptyMessage(SHOW_BATTERY);
 
@@ -498,6 +542,10 @@ class MyThread extends Thread {
 
         return view;
     }
+
+
+
+
 
     class AsynFind extends AsyncTask{
 

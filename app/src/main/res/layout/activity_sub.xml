@@ -29,21 +29,33 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/linechart"
         android:layout_margin="18dp"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:id="@+id/linearLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="当前设置的正常心跳为："/>
+        <TextView
+            android:id="@+id/threshold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="36dp"
+            android:text="100"/>
         <info.hoang8f.widget.FButton
             android:id="@+id/setInfoBtn"
-        android:layout_height="36dp"
+            android:layout_height="36dp"
             android:layout_width="wrap_content"
-        fbutton:buttonColor="@color/fbutton_color_peter_river"
-        fbutton:shadowColor="@color/fbutton_color_belize_hole"
-        fbutton:shadowEnabled="true"
-        fbutton:shadowHeight="5dp"
-        fbutton:cornerRadius="5dp"
+            fbutton:buttonColor="@color/fbutton_color_peter_river"
+            fbutton:shadowColor="@color/fbutton_color_belize_hole"
+            fbutton:shadowEnabled="true"
+            fbutton:shadowHeight="5dp"
+            fbutton:cornerRadius="5dp"
 
             android:text="点击设置心跳"
             android:textColor="@color/fbutton_color_clouds"
-        />
+            />
     </LinearLayout>
 
     <FrameLayout

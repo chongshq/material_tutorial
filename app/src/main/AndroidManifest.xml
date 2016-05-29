@@ -41,20 +41,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity
-            android:name="cn.bong.android.sdk.AuthActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
 
-        <receiver
-            android:name="cn.bong.android.sdk.BongDataReceiver"
-            android:permission="cn.bong.android.permission.EVENT">
-            <intent-filter>
-                <action android:name="cn.bong.android.action.event" />
-            </intent-filter>
-        </receiver>
 
-        <service android:name="cn.bong.android.sdk.BlueService" />
+
         <service android:name=".HeartBeatService">
             <intent-filter>
                 <action android:name=".service.HEARTSERVICE" />

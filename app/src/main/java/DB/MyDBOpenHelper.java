@@ -14,11 +14,17 @@ public class MyDBOpenHelper extends SQLiteOpenHelper {
     //数据库第一次创建时被调用
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE band(InfoId INTEGER PRIMARY KEY AUTOINCREMENT,band_addr VARCHAR(20),date VARCHAR(20), heartbeat INTEGER)");
+        db.execSQL("CREATE TABLE elder_band(band_addr VARCHAR(20) PRIMARY KEY,elder_name VARCHAR(20),band_name VARCHAR(20), heartbeat INTEGER)");
 
     }
     //软件版本号发生改变时调用
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("ALTER TABLE band ADD phone VARCHAR(12) NULL");
+        //db.execSQL("ALTER TABLE band ADD phone VARCHAR(12) NULL");
+       // db.execSQL("CREATE TABLE elder_band(band_addr INTEGER PRIMARY KEY,elder_name VARCHAR(20),band_name VARCHAR(20), heartbeat INTEGER)");
+        db.execSQL("DROP TABLE elder_band");
+        db.execSQL("CREATE TABLE elder_band(band_addr VARCHAR(20) PRIMARY KEY,elder_name VARCHAR(20),band_name VARCHAR(20), heartbeat INTEGER)");
+
+
     }
 }
