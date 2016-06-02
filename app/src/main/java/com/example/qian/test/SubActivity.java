@@ -54,6 +54,7 @@ import DB.MyDBOpenHelper;
 public class SubActivity extends ActionBarActivity {
     private static final int MIBAND_DETECT = 1;
     private static final int HEART_RESULT = 2;
+    public static final String action = "jason.broadcast.action";
     private SQLiteDatabase db;
     private MyDBOpenHelper myDBHelper;
     private StringBuilder stringBuilder;
@@ -80,6 +81,9 @@ public class SubActivity extends ActionBarActivity {
     private int serviceflag = 0;
     private int threshold = 100;
     private TextView thres;
+    private CallBackInterface callBack;
+    private int heartThreshold;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,18 +125,27 @@ public class SubActivity extends ActionBarActivity {
         initNewChart(chartView);
 
         setNewChart(chartView);
+
+
         Intent it = getIntent();
         Bundle b = it.getExtras();
-        int heartThreshold = b.getInt("heartThreshold");
+        heartThreshold = b.getInt("heartThreshold");
         if(heartThreshold==0){
             setThreshold(heartThreshold);
+
         }else {
             thres.setText(heartThreshold+"");
         }
 
     }
 
-    private void setThreshold(final int heartThreshold){
+    public void setCallBackListener(CallBackInterface callBack)
+    {
+        this.callBack = callBack;
+    }
+
+
+    private void setThreshold(final int heartThres){
         final String[] items = new String[]{"60", "70", "80", "90", "100","110","120"};
         alert = null;
         builder = new AlertDialog.Builder(SubActivity.this);
@@ -141,19 +154,31 @@ public class SubActivity extends ActionBarActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Toast.makeText(mContext, "你点击了取消按钮~", Toast.LENGTH_SHORT).show();
-                        if(heartThreshold==0){
+                        if(heartThres==0){
                             db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
                                     new String[]{100+"",band_addr});
                             thres.setText(100+"");
+                            if (callBack != null) callBack.setHeartThresholdComplete(100);
+
+//                            Intent intent = new Intent(action);
+//                            intent.putExtra("newHeartThreshold", 100);
+//                            sendBroadcast(intent);
+
                             Intent it = new Intent();
                             it.putExtra("newHeartThreshold",100);
                             setResult(2,it);
                         }else {
                             db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
-                                    new String[]{heartThreshold+"",band_addr});
-                            thres.setText(heartThreshold+"");
+                                    new String[]{heartThres+"",band_addr});
+                            thres.setText(heartThres+"");
+                            if (callBack != null) callBack.setHeartThresholdComplete(heartThres);
+
+//                            Intent intent = new Intent(action);
+//                            intent.putExtra("newHeartThreshold", heartThreshold);
+//                            sendBroadcast(intent);
+
                             Intent it = new Intent();
-                            it.putExtra("newHeartThreshold",100);
+                            it.putExtra("newHeartThreshold",heartThres);
                             setResult(2,it);
                         }
 
@@ -166,8 +191,14 @@ public class SubActivity extends ActionBarActivity {
                         db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
                                 new String[]{threshold+"",band_addr});
                         thres.setText(threshold+"");
+                        if (callBack != null) callBack.setHeartThresholdComplete(threshold);
+//                        Intent intent = new Intent(action);
+//                        intent.putExtra("newHeartThreshold", threshold);
+//                        sendBroadcast(intent);
+
                         Intent it = new Intent();
                         it.putExtra("newHeartThreshold",threshold);
+                        heartThreshold = threshold;
                         setResult(2,it);
                     }
                 })
@@ -186,7 +217,7 @@ public class SubActivity extends ActionBarActivity {
         setInfobtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               setThreshold(threshold);
+               setThreshold(heartThreshold);
             }
         });
 
@@ -271,6 +302,8 @@ public class SubActivity extends ActionBarActivity {
         });
 
     }
+
+
 
     class MyThread extends Thread {
         private Handler handler;

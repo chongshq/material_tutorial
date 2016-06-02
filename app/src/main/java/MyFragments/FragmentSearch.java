@@ -1,6 +1,7 @@
 package MyFragments;
 
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,9 +10,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -48,6 +51,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.qian.test.AdapterBand;
+import com.example.qian.test.CallBackInterface;
 import com.example.qian.test.Elder;
 import com.example.qian.test.MyApplication;
 import com.example.qian.test.R;
@@ -72,9 +76,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import DB.MyBlueToothDevice;
 import DB.MyDBOpenHelper;
+import DB.RssiCompare;
 import cn.bong.android.sdk.BongManager;
 import cn.bong.android.sdk.config.Environment;
 import cn.bong.android.sdk.model.http.auth.AuthError;
@@ -88,7 +96,7 @@ import network.VolleySingleton;
  * Use the {@link FragmentSearch#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentSearch extends Fragment {
+public class FragmentSearch extends Fragment{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -145,13 +153,15 @@ public class FragmentSearch extends Fragment {
     private RecyclerView bandList;
     private AdapterBand adapterBand;
     private List<BluetoothDevice> device_conn;
-    private List<String> bluetoothDevices;
+    private List<MyBlueToothDevice> bluetoothDevices;
     private BluetoothDevice miband_selected;
     private BatteryInfo batteryInfo;
     private MyThread thread;
     private int mHeartRate;
     private int flag;
     private int heartThreshold;
+    private MyBlueToothDevice myBlueToothDevice;
+    private CallBackInterface callBack;
 
     private Thread mThread;
     public FragmentSearch() {
@@ -221,7 +231,9 @@ public class FragmentSearch extends Fragment {
 
             if(device_conn.size()==0){
                 device_conn.add(device);
-                bluetoothDevices.add("设备名称："+device.getName()+" | "+"地址："+device.getAddress()+" | "+"信息:" + getInfoFromDB(device.getAddress()));
+                myBlueToothDevice = new MyBlueToothDevice(device,device.getName(),device.getAddress(),result.getRssi(),getInfoFromDB(device.getAddress()));
+                //bluetoothDevices.add("设备名称："+device.getName()+" | "+"地址："+device.getAddress()+" | "+"信息:" + getInfoFromDB(device.getAddress())+" | 信号强度:" + result.getRssi());
+                bluetoothDevices.add(myBlueToothDevice);
             }else{
                 for(int i=0;i<device_conn.size();i++){
 
@@ -230,7 +242,10 @@ public class FragmentSearch extends Fragment {
                     }else{
                         if(i==device_conn.size()-1){
                             device_conn.add(device);
-                            bluetoothDevices.add("设备名称："+device.getName()+" | "+"地址："+device.getAddress()+" | "+"信息:" + getInfoFromDB(device.getAddress()));
+                            myBlueToothDevice = new MyBlueToothDevice(device,device.getName(),device.getAddress(),result.getRssi(),getInfoFromDB(device.getAddress()));
+                            //bluetoothDevices.add("设备名称："+device.getName()+" | "+"地址："+device.getAddress()+" | "+"信息:" + getInfoFromDB(device.getAddress())+" | 信号强度:" + result.getRssi());
+                            bluetoothDevices.add(myBlueToothDevice);
+
                         }
                     }
                 }
@@ -243,7 +258,9 @@ public class FragmentSearch extends Fragment {
         }
     };
 
-//    class LooperThread extends Thread {
+
+
+    //    class LooperThread extends Thread {
 //        public Handler mHandler;
 //
 //        public void run() {
@@ -387,25 +404,94 @@ class MyThread extends Thread {
         volleySingleton= VolleySingleton.getsInstance();
         requestQueue=volleySingleton.getRequestQueue();
         notificationManager= (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        // requestWindowFeature(Window.FEATURE_NO_TITLE);
-       // setContentView(R.layout.activity_main);
-     //  prepare();
-//        initView();
 
          miBand=new MiBand(getActivity());
         device_conn=new ArrayList<BluetoothDevice>();
-        bluetoothDevices = new ArrayList<String>();
+        bluetoothDevices = new ArrayList<MyBlueToothDevice>();
+//        IntentFilter filter = new IntentFilter(SubActivity.action);
+//        getActivity().registerReceiver(broadcastReceiver, filter);
 
-        PreferenceManager.OnActivityResultListener on = new PreferenceManager.OnActivityResultListener() {
+    }
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            int i = intent.getIntExtra("newHeartThreshold",100);
+            heartThreshold= i;
+        }
+    };
+
+        @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode==2){
+            int i = data.getIntExtra("newHeartThreshold",100);
+            heartThreshold= i;
+        }
+
+    }
+//    @Override
+//    public void setHeartThresholdComplete(int threshold) {
+//        int i = threshold;
+//        heartThreshold= i;
+//    }
+
+
+    public void procedure(int data) {
+        Toast.makeText(getActivity(), "你选择了" + bluetoothDevices.get(data).getName(), Toast.LENGTH_SHORT).show();
+        miband_selected = device_conn.get(data);
+        //mHandler.sendEmptyMessage(MIBAND_CONNECT);
+        thread = new MyThread();
+        thread.start();
+//                thread.handler.sendEmptyMessage(MIBAND_CONNECT);
+
+        Toast.makeText(getActivity(), "Connecting now ...", Toast.LENGTH_SHORT).show();
+        setLoadDataComplete(new isLoadDataListener() {
             @Override
-            public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-                int i = data.getIntExtra("newHeartThreshold",100);
-                heartThreshold= i;
-                return false;
+            public void loadComplete() {
+                //miBand.setLedColor(LedColor.BLUE);
+                // Toast.makeText(getActivity(),"Connected",Toast.LENGTH_SHORT).show();
+                thread.handler.sendEmptyMessage(CONNECTED);
+                miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
+                miBand.pair(new ActionCallback() {
+                    @Override
+                    public void onSuccess(Object data) {
+                        //changeStatus("pair succ");
+                    }
+
+                    @Override
+                    public void onFail(int errorCode, String msg) {
+                        //changeStatus("pair fail");
+                    }
+                });
+                miBand.setDisconnectedListener(new NotifyListener() {
+                    @Override
+                    public void onNotify(byte[] data) {
+                        thread.handler.sendEmptyMessage(NOTIFY_DISCONNECTION);
+                    }
+                });
+                if (flag == 0) {
+                    db.execSQL("INSERT INTO elder_band(band_addr,elder_name,band_name,heartbeat) values(?,?,?,?)",
+                            new String[]{miband_selected.getAddress(), "我的手环", miband_selected.getName(), 0 + ""});
+                    flag = 1;
+                } else if (flag == 1) {
+
+                }
+
+
+                MyApplication myApplication = (MyApplication) getActivity().getApplicationContext();
+                myApplication.setMiBand(miBand, getActivity());
+                myApplication.setBand_addr(miband_selected.getAddress());
+                Intent it = new Intent(getActivity(), SubActivity.class);
+                Bundle b = new Bundle();
+                b.putInt("heartThreshold", heartThreshold);
+                it.putExtras(b);
+                startActivityForResult(it, 2);
+                //thread.handler.sendEmptyMessage(SHOW_BATTERY);
+
             }
-        };
-
-
+        });
     }
 
     @Override
@@ -417,67 +503,17 @@ class MyThread extends Thread {
         bandList.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapterBand=new AdapterBand(getActivity());
         bandList.setAdapter(adapterBand);
+//        setCallBackListener(new CallBackInterface() {
+//            @Override
+//            public void setHeartThresholdComplete(int threshold) {
+//                Toast.makeText(getActivity(),"回调",Toast.LENGTH_SHORT).show();
+//            }
+//        });
         adapterBand.setOnItemClickListener(new AdapterBand.OnRecyclerViewItemClickListener() {
 
             @Override
             public void onItemClick(View view, int data) {
-                Toast.makeText(getActivity(), "你选择了" + bluetoothDevices.get(data), Toast.LENGTH_SHORT).show();
-                miband_selected = device_conn.get(data);
-                //mHandler.sendEmptyMessage(MIBAND_CONNECT);
-                thread = new MyThread();
-                thread.start();
-//                thread.handler.sendEmptyMessage(MIBAND_CONNECT);
-
-                Toast.makeText(getActivity(),"Connecting now ...",Toast.LENGTH_SHORT).show();
-                setLoadDataComplete(new isLoadDataListener() {
-                    @Override
-                    public void loadComplete() {
-                        //miBand.setLedColor(LedColor.BLUE);
-                        // Toast.makeText(getActivity(),"Connected",Toast.LENGTH_SHORT).show();
-                        thread.handler.sendEmptyMessage(CONNECTED);
-                        miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
-                        miBand.pair(new ActionCallback() {
-                            @Override
-                            public void onSuccess(Object data)
-                            {
-                                //changeStatus("pair succ");
-                            }
-
-                            @Override
-                            public void onFail(int errorCode, String msg)
-                            {
-                                //changeStatus("pair fail");
-                            }
-                        });
-                        miBand.setDisconnectedListener(new NotifyListener()
-                        {
-                            @Override
-                            public void onNotify(byte[] data)
-                            {
-                                thread.handler.sendEmptyMessage(NOTIFY_DISCONNECTION);
-                            }
-                        });
-                        if(flag == 0){
-                            db.execSQL("INSERT INTO elder_band(band_addr,elder_name,band_name,heartbeat) values(?,?,?,?)",
-                                    new String[]{miband_selected.getAddress(),"我的手环",miband_selected.getName(),0+""});
-                            flag = 1;
-                        }else if(flag==1){
-
-                        }
-
-
-                        MyApplication myApplication = (MyApplication)getActivity().getApplicationContext();
-                        myApplication.setMiBand(miBand,getActivity());
-                        myApplication.setBand_addr(miband_selected.getAddress());
-                        Intent it = new Intent(getActivity(), SubActivity.class);
-                        Bundle b = new Bundle();
-                        b.putInt("heartThreshold",heartThreshold);
-                        it.putExtras(b);
-                        startActivityForResult(it,2);
-                        //thread.handler.sendEmptyMessage(SHOW_BATTERY);
-
-                    }
-                });
+                procedure(data);
             }
 
             @Override
@@ -566,7 +602,7 @@ class MyThread extends Thread {
 
         @Override
         protected void onPreExecute() {
-            alert=ProgressDialog.show(getActivity(), "搜索手环", "正在查找附近设备,请稍后...",false,true);
+            alert=ProgressDialog.show(getActivity(), "搜索手环", "正在查找附近设备,并尝试连接,请稍后...",false,true);
             super.onPreExecute();
         }
 
@@ -578,13 +614,25 @@ class MyThread extends Thread {
             if(device_conn.size()==0){
                 //mHandler.sendEmptyMessage(2);
             }else {
+                Collections.sort(bluetoothDevices,new RssiCompare());
 //            Toast.makeText(getActivity(),"搜索完成",Toast.LENGTH_SHORT).show();
 //            final String[] band = new String[]{"Shanghai", "Beijing", "手环3", "手环4", "手环5", "手环6", "手环7"};
                 alert1 = null;
                 builder1 = new AlertDialog.Builder(getActivity());
-                String[] array = (String[]) bluetoothDevices.toArray(new String[bluetoothDevices.size()]);
-                adapterBand.setBandList(bluetoothDevices);
+                //String[] array = (String[]) bluetoothDevices.toArray(new String[bluetoothDevices.size()]);
+                List<String> array = new ArrayList<String>();
+                for(int i=0 ;i<bluetoothDevices.size();i++){
 
+                    array.add("设备名称："+bluetoothDevices.get(i).getName()+" | "+"地址："+bluetoothDevices.get(i).getAddress()+" | 信号强度:" +bluetoothDevices.get(i).getRssi()+" | "+"信息:" +bluetoothDevices.get(i).getInfo());
+                }
+                adapterBand.setBandList(array);
+
+            }
+            for(int i=0;i<bluetoothDevices.size();i++){
+                if(Objects.equals(bluetoothDevices.get(i).getName(), "MI1S")){
+                   // Toast.makeText(getActivity(),"find mi band",Toast.LENGTH_SHORT).show();
+                    procedure(i);
+                }
             }
         }
     }
@@ -623,6 +671,7 @@ class MyThread extends Thread {
         });
         requestQueue.add(request);
     }
+
 
     private Elder parseJSONResponse(JSONObject response){
         Elder _elder = new Elder();

@@ -102,6 +102,8 @@ public class MainActivity extends ActionBarActivity {
         return  super.onOptionsItemSelected(item);
     }
 
+
+
     class MyPagerAdapter extends FragmentStatePagerAdapter {
 
         int icons[]={R.drawable.ic_archive_white_36dp,R.drawable.ic_drafts_white_36dp,R.drawable.ic_report_white_36dp};
