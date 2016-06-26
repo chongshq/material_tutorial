@@ -260,38 +260,6 @@ public class FragmentSearch extends Fragment{
 
 
 
-    //    class LooperThread extends Thread {
-//        public Handler mHandler;
-//
-//        public void run() {
-//            Looper.prepare();
-//            mHandler = new Handler() {
-//                public void handleMessage(Message msg) {
-//                    switch (msg.what) {
-//                        case MIBAND_CONNECT:
-//                            miBand.connect(miband_selected, new ActionCallback() {
-//
-//                                @Override
-//                                public void onSuccess(Object data) {
-//                                    Toast.makeText(getActivity(), "connect success", Toast.LENGTH_SHORT).show();
-//                                    miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
-//                                }
-//
-//                                @Override
-//                                public void onFail(int errorCode, String msg) {
-//                                    Toast.makeText(getActivity(), "connect failed", Toast.LENGTH_SHORT).show();
-//                                }
-//                            });
-//                            break;
-//                        case 2:
-//                            Toast.makeText(getActivity(), "未找到设备", Toast.LENGTH_SHORT).show();
-//                            break;
-//                    }
-//                }
-//            };
-//            Looper.loop();
-//        }
-//    }
 class MyThread extends Thread {
     private Handler handler;
 
@@ -440,7 +408,7 @@ class MyThread extends Thread {
 
     public void procedure(int data) {
         Toast.makeText(getActivity(), "你选择了" + bluetoothDevices.get(data).getName(), Toast.LENGTH_SHORT).show();
-        miband_selected = device_conn.get(data);
+        miband_selected = bluetoothDevices.get(data).getBluetoothDevice();
         //mHandler.sendEmptyMessage(MIBAND_CONNECT);
         thread = new MyThread();
         thread.start();
@@ -623,7 +591,7 @@ class MyThread extends Thread {
                 List<String> array = new ArrayList<String>();
                 for(int i=0 ;i<bluetoothDevices.size();i++){
 
-                    array.add("设备名称："+bluetoothDevices.get(i).getName()+" | "+"地址："+bluetoothDevices.get(i).getAddress()+" | 信号强度:" +bluetoothDevices.get(i).getRssi()+" | "+"信息:" +bluetoothDevices.get(i).getInfo());
+                    array.add("设备名称："+bluetoothDevices.get(i).getName()+"\n"+"地址："+bluetoothDevices.get(i).getAddress()+"\n"+"信号强度:" +bluetoothDevices.get(i).getRssi()+"\n"+"信息:" +bluetoothDevices.get(i).getInfo());
                 }
                 adapterBand.setBandList(array);
 

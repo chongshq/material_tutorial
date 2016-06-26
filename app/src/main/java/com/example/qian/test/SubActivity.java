@@ -135,6 +135,7 @@ public class SubActivity extends ActionBarActivity {
 
         }else {
             thres.setText(heartThreshold+"");
+            threshold = heartThreshold;
         }
 
     }
@@ -158,6 +159,7 @@ public class SubActivity extends ActionBarActivity {
                             db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
                                     new String[]{100+"",band_addr});
                             thres.setText(100+"");
+                            threshold = 100;
                             if (callBack != null) callBack.setHeartThresholdComplete(100);
 
 //                            Intent intent = new Intent(action);
@@ -171,6 +173,7 @@ public class SubActivity extends ActionBarActivity {
                             db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
                                     new String[]{heartThres+"",band_addr});
                             thres.setText(heartThres+"");
+                            threshold = heartThres;
                             if (callBack != null) callBack.setHeartThresholdComplete(heartThres);
 
 //                            Intent intent = new Intent(action);
@@ -191,6 +194,7 @@ public class SubActivity extends ActionBarActivity {
                         db.execSQL("UPDATE elder_band SET heartbeat = ? WHERE band_addr = ?",
                                 new String[]{threshold+"",band_addr});
                         thres.setText(threshold+"");
+
                         if (callBack != null) callBack.setHeartThresholdComplete(threshold);
 //                        Intent intent = new Intent(action);
 //                        intent.putExtra("newHeartThreshold", threshold);
