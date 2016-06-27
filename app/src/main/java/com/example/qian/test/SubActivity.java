@@ -54,6 +54,8 @@ import DB.MyDBOpenHelper;
 public class SubActivity extends ActionBarActivity {
     private static final int MIBAND_DETECT = 1;
     private static final int HEART_RESULT = 2;
+    public static final String TONORMAL ="service.tonormal";
+    public static final String TOEMERGENCY ="service.toemergency";
     public static final String action = "jason.broadcast.action";
     private SQLiteDatabase db;
     private MyDBOpenHelper myDBHelper;
@@ -269,22 +271,37 @@ public class SubActivity extends ActionBarActivity {
                                             //Toast.makeText(SubActivity.this,heartRate,Toast.LENGTH_SHORT).show();
                                             heartbeat_result = heartRate;
                                             addEntry();
+                                            Log.d("backservice", threshold+" "+heartRate);
                                             if(heartRate > threshold || heartRate<=40){
-                                                stopService(normalIntent);
-                                                if(serviceflag == 0){
+//                                                stopService(normalIntent);
+//                                                Log.d("backservice", "normal stop"+ " "+serviceflag);
+//                                                if(serviceflag == 0){
+//
+//                                                    startService(emergencyIntent);
+//
+//                                                    serviceflag = 1;
+//                                                    Log.d("backservice", "emergency start"+ " "+serviceflag);
+//                                                }
 
-                                                    startService(emergencyIntent);
+                                                if(serviceflag == 0){
+                                                    Intent intent = new Intent(TOEMERGENCY);
+                                                    sendBroadcast(intent);
                                                     serviceflag = 1;
                                                 }
-
-
                                             }else if(heartRate>40 && heartRate<=threshold){
-                                                stopService(emergencyIntent);
+//                                                stopService(emergencyIntent);
+//                                                Log.d("backservice", "emergency stop"+ " "+serviceflag);
+//                                                if(serviceflag == 1){
+//                                                    startService(normalIntent);
+//
+//                                                    serviceflag = 0;
+//                                                    Log.d("backservice", "normal start" + " "+serviceflag);
+//                                                }
                                                 if(serviceflag == 1){
-                                                    startService(normalIntent);
+                                                    Intent intent = new Intent(TONORMAL);
+                                                    sendBroadcast(intent);
                                                     serviceflag = 0;
                                                 }
-
                                             }
                                         }
                                     });

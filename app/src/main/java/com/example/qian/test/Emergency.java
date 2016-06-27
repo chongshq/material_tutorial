@@ -47,4 +47,10 @@ public class Emergency extends Service {
         },delay,period);
         return super.onStartCommand(intent, flags, startId);
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("BackService","emergency stop");
+    }
 }
